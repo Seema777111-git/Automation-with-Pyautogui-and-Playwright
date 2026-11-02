@@ -1,362 +1,87 @@
 # 🤖 Automation with PyAutoGUI and Playwright
 
-A collection of practical **Python automation projects** using **PyAutoGUI** and **Playwright** to automate repetitive desktop and browser-based tasks.
+Two Python automation projects: one controls the **desktop** (mouse and keyboard), the other controls a **web
+browser** (page elements).
 
-This repository demonstrates how Python can be used to automate real-world activities such as **data collection, Excel report generation, screenshots, browser interaction, and web application automation**.
-
----
-
-## 📌 About This Repository
-
-The purpose of this repository is to learn and demonstrate **practical automation using Python**.
-
-It contains two automation projects:
+| # | Project | Tool | What it automates |
+|---|---|---|---|
+| 1 | [**Daily Report Bot**](daily_report_bot) | PyAutoGUI | Opens Chrome, copies the live Bitcoin price from CoinDesk, writes it into Excel, saves the report and a screenshot |
+| 2 | [**WhatsApp Message Bot**](Play_wright_bot) | Playwright | Reads contacts from Excel, sends each a personalised WhatsApp Web message, screenshots it, reads their last 3 replies and saves a report |
 
 ```text
-Automation-with-Pyautogui-and-Playwright
+Automation-with-Pyautogui-and-Playwright/
+├── daily_report_bot/          Project 1 · PyAutoGUI
+│   ├── daily_report_bot.py
+│   ├── find_coordinates.py
+│   ├── screen_record.py
+│   ├── requirements.txt
+│   └── README.md
 │
-├── 📁 daily_report_bot
-│   └── Automated Daily Report
-│
-└── 📁 Play_wright_bot
-    └── Browser / WhatsApp Automation
+└── Play_wright_bot/           Project 2 · Playwright
+    ├── playwright_assign.py
+    ├── Contact.sample.xlsx
+    ├── requirements.txt
+    └── README.md
+```
+
+Each folder has its own README with the steps, files and how to run it.
+
+---
+
+## PyAutoGUI vs Playwright
+
+| | PyAutoGUI (Project 1) | Playwright (Project 2) |
+|---|---|---|
+| Controls | Mouse, keyboard, whole screen | The browser and its page elements |
+| Finds things by | Keyboard shortcuts, screen position | CSS selectors, text, roles |
+| Works with | Any desktop app (Chrome, Excel…) | Web pages |
+| Reliability | Depends on timing and screen layout | Waits for elements; much more reliable |
+| Runs in background | No, it takes over the PC | Yes (can run headless) |
+| Best for | Desktop apps with no API | Web apps and browser testing |
+
+```text
+PyAutoGUI:   Python → mouse + keyboard → screen → any app
+Playwright:  Python → browser → page elements (selectors) → web app
 ```
 
 ---
 
-# 🛠️ Technologies Used
-
-| Technology       | Purpose                    |
-| ---------------- | -------------------------- |
-| 🐍 Python        | Automation programming     |
-| 🖱️ PyAutoGUI    | Desktop and GUI automation |
-| 🌐 Playwright    | Browser automation         |
-| 📊 Excel         | Report/data storage        |
-| 📄 BeautifulSoup | Web page parsing           |
-| 🌍 Requests      | HTTP requests              |
-| 📋 Pyperclip     | Clipboard automation       |
-| 🔧 Git & GitHub  | Version control            |
-
----
-
-# 📂 Projects
-
-## 1️⃣ Daily Report Bot
-
-📁 `daily_report_bot`
-
-An automation script designed to collect online information and generate a daily report.
-
-### Workflow
-
-```text
-Start
-  ↓
-Open / Access Web Data
-  ↓
-Extract Required Information
-  ↓
-Process Data
-  ↓
-Create Excel Report
-  ↓
-Save Screenshot
-  ↓
-Complete
-```
-
-### Key Features
-
-* 🌐 Access web information
-* 🔎 Extract required data
-* 📊 Create Excel reports
-* 📸 Capture screenshots
-* 📁 Save output automatically
-* 🤖 Reduce repetitive manual work
-
-### Example Use Case
-
-A daily business report can be automated instead of manually:
-
-```text
-Open Website
-     ↓
-Find Required Information
-     ↓
-Copy Data
-     ↓
-Update Excel
-     ↓
-Save Report
-     ↓
-Take Screenshot
-```
-
----
-
-# 2️⃣ Playwright Automation Bot
-
-📁 `Play_wright_bot`
-
-A browser automation project using **Playwright with Python**.
-
-The project demonstrates automating browser interaction and searching for contacts using information stored in Excel.
-
-### Workflow
-
-```text
-Excel Contact List
-        ↓
-Python Script
-        ↓
-Launch Browser
-        ↓
-Open Web Application
-        ↓
-Search Contact
-        ↓
-Validate Search Result
-        ↓
-Perform Automation
-```
-
-### Key Concepts
-
-* Browser automation
-* Web element interaction
-* Search automation
-* Excel-based input
-* Automated browser control
-* Error handling
-* Screenshots / debugging
-* Selector-based automation
-
----
-
-# 🔄 PyAutoGUI vs Playwright
-
-| Feature                    | PyAutoGUI | Playwright |
-| -------------------------- | --------- | ---------- |
-| Desktop automation         | ✅         | ❌          |
-| Browser automation         | ✅         | ✅          |
-| Mouse control              | ✅         | Limited    |
-| Keyboard control           | ✅         | Limited    |
-| Web element selectors      | ❌         | ✅          |
-| Browser testing            | ❌         | ✅          |
-| GUI-based automation       | ✅         | ❌          |
-| Web application automation | Basic     | Advanced   |
-
-### Simple Explanation
-
-**PyAutoGUI**
-
-```text
-Python
-  ↓
-Mouse + Keyboard
-  ↓
-Screen / Desktop
-```
-
-**Playwright**
-
-```text
-Python
-  ↓
-Browser
-  ↓
-Web Elements
-  ↓
-Automation
-```
-
----
-
-# ⚙️ Installation
-
-Clone the repository:
+## Quick start
 
 ```bash
 git clone https://github.com/Seema777111-git/Automation-with-Pyautogui-and-Playwright.git
-```
-
-Navigate to the project:
-
-```bash
 cd Automation-with-Pyautogui-and-Playwright
-```
-
-Create a Python virtual environment:
-
-```bash
-py -3.11 -m venv .venv
-```
-
-Activate the environment:
-
-```bash
+python -m venv .venv
 .venv\Scripts\activate
 ```
 
-Install the required packages:
-
-```bash
-pip install -r requirements.txt
-```
-
-For Playwright:
-
-```bash
-playwright install
-```
-
----
-
-# ▶️ Running the Projects
-
-## Daily Report Bot
-
-Navigate to:
-
+**Project 1**
 ```bash
 cd daily_report_bot
-```
-
-Run:
-
-```bash
+pip install -r requirements.txt
 python daily_report_bot.py
 ```
 
----
-
-## Playwright Bot
-
-Navigate to:
-
+**Project 2**
 ```bash
 cd Play_wright_bot
-```
-
-Run:
-
-```bash
+pip install -r requirements.txt
+playwright install chromium
+copy Contact.sample.xlsx Contact.xlsx      # add your contacts
 python playwright_assign.py
 ```
 
 ---
 
-# 📊 Automation Architecture
+## Skills shown
 
-```text
-                 ┌─────────────────┐
-                 │      USER       │
-                 └────────┬────────┘
-                          ↓
-                 ┌─────────────────┐
-                 │     Python      │
-                 └────────┬────────┘
-                          ↓
-              ┌───────────┴───────────┐
-              ↓                       ↓
-       ┌──────────────┐        ┌──────────────┐
-       │  PyAutoGUI   │        │  Playwright  │
-       └──────┬───────┘        └──────┬───────┘
-              ↓                       ↓
-       Desktop / GUI             Web Browser
-              │                       │
-              └───────────┬───────────┘
-                          ↓
-                 ┌─────────────────┐
-                 │ Automated Output │
-                 └─────────────────┘
-```
-
----
-
-# 🎯 Learning Objectives
-
-Through these projects, I am building practical knowledge in:
-
-* Python automation
-* Desktop automation
-* Browser automation
-* Web scraping
-* Excel automation
-* UI interaction
-* Error handling
-* Debugging automation scripts
-* Repetitive task automation
-* End-to-end automation workflows
-
----
-
-# 🚀 Future Enhancements
-
-Planned improvements include:
-
-* [x] PyAutoGUI automation
-* [x] Playwright browser automation
-* [x] Excel integration
-* [x] Screenshot generation
-* [x] Web data extraction
-* [ ] Better error handling
-* [ ] Logging framework
-* [ ] Automated email reports
-* [ ] Scheduled execution
-* [ ] AI-powered automation
-* [ ] n8n integration
-* [ ] End-to-end business process automation
-
----
-
-# 💡 Real-World Applications
-
-These automation techniques can be applied to:
-
-* 📊 Daily business reporting
-* 📧 Email automation
-* 📑 Excel data processing
-* 🌐 Web application automation
-* 🔍 Data collection
-* 🧾 Report generation
-* 🛒 E-commerce operations
-* 📦 Logistics operations
-* 👥 CRM automation
-* 🔄 Repetitive business processes
-
----
-
-# 🎓 Project Goal
-
-The goal of this repository is to progress from **simple Python automation → browser automation → business process automation → AI-powered automation**.
-
-```text
-Python
-   ↓
-PyAutoGUI
-   ↓
-Playwright
-   ↓
-Web Automation
-   ↓
-Business Automation
-   ↓
-AI Automation
-   ↓
-AI Agents
-```
-
----
+* Desktop automation: keyboard shortcuts, clipboard, screenshots (PyAutoGUI, pyperclip)
+* Browser automation: persistent login, selectors, waits, debugging snapshots (Playwright)
+* Excel input and output (pandas, openpyxl)
+* Data extraction with regex
+* Safe automation: checking the target before an action that can't be undone
 
 ## 👩‍💻 Author
 
-**Seema**
-
-Interested in:
-
-**Python Automation | AI | Generative AI | LangChain | RAG | AI Agents | Business Automation**
-
----
-
-⭐ If you find this repository useful, feel free to explore the projects and follow the learning journey.
+**Seema** · Python Automation | AI | Generative AI | RAG | AI Agents ·
+[GitHub](https://github.com/Seema777111-git)

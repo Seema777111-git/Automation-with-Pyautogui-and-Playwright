@@ -1,0 +1,21 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Editor
+.vscode/
+
+# WhatsApp bot: login session, real contacts and run outputs (private)
+Play_wright_bot/whatsapp_profile/
+Play_wright_bot/Contact.xlsx
+Play_wright_bot/screenshots/
+Play_wright_bot/whatsapp_report_*
+
+# Daily report bot: generated reports
+daily_report_bot/daily_report_*.xlsx
+daily_report_bot/daily_report_*.png
+
+# Demo recording of an early run (not published)
+daily_report_bot/demo/

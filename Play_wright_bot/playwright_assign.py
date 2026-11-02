@@ -40,11 +40,10 @@ sys.stdout.reconfigure(line_buffering=True)
 # SECTION 1 - PROJECT SETTINGS
 # ============================================================
 
-BASE_DIR = Path(
-    r"D:\SE\Week1\Day3\Play_wright_bot"
-)
+# Folder that contains this script (works on any PC)
+BASE_DIR = Path(__file__).resolve().parent
 
-CONTACT_FILE = BASE_DIR / "contact.xlsx"
+CONTACT_FILE = BASE_DIR / "Contact.xlsx"
 
 WHATSAPP_URL = "https://web.whatsapp.com"
 
@@ -702,6 +701,52 @@ async def find_search_results(page):
 
 
 # ============================================================
+# HELPERS - MAKE SURE WE MESSAGE THE RIGHT PERSON
+# ============================================================
+
+def result_matches_contact(
+    text,
+    excel_name,
+    target_last10
+):
+    """True if the text shows the contact's name or phone number."""
+
+    text = str(text or "")
+
+    if excel_name and excel_name.lower() in text.lower():
+        return True
+
+    text_digits = re.sub(r"\D", "", text)
+
+    return bool(target_last10) and target_last10 in text_digits
+
+
+async def get_chat_header_text(page):
+    """Title of the chat that is open now (name or number)."""
+
+    for selector in [
+        "#main header span[dir='auto']",
+        "#main header",
+    ]:
+
+        try:
+
+            locator = page.locator(selector).first
+
+            if await locator.count() > 0:
+
+                text = (await locator.inner_text()).strip()
+
+                if text:
+                    return text
+
+        except Exception:
+            continue
+
+    return ""
+
+
+# ============================================================
 # STEP 4 - SEARCH CONTACT BY PHONE
 # ============================================================
 
@@ -910,6 +955,23 @@ async def search_contact(
                     continue
 
                 # ------------------------------------------------
+                # SAFETY: ONLY OPEN A RESULT THAT MATCHES
+                # (name or last 10 digits of the phone)
+                # ------------------------------------------------
+
+                if not result_matches_contact(
+                    result_text,
+                    excel_name,
+                    target_last10
+                ):
+
+                    print(
+                        "Not this contact - skipping."
+                    )
+
+                    continue
+
+                # ------------------------------------------------
                 # OPEN RESULT
                 # ------------------------------------------------
 
@@ -929,6 +991,37 @@ async def search_contact(
                     state="visible",
                     timeout=10000
                 )
+
+                # ------------------------------------------------
+                # SAFETY: CONFIRM THE OPEN CHAT IS THE RIGHT ONE
+                # ------------------------------------------------
+
+                header_text = await get_chat_header_text(
+                    page
+                )
+
+                print(
+                    "Open chat header:",
+                    header_text
+                )
+
+                if not result_matches_contact(
+                    header_text,
+                    excel_name,
+                    target_last10
+                ):
+
+                    print(
+                        "Open chat does not match this contact - "
+                        "NOT sending."
+                    )
+
+                    await save_debug_snapshot(
+                        page,
+                        f"wrong_chat_{excel_name}"
+                    )
+
+                    return False
 
                 print()
                 print("==========================================")
