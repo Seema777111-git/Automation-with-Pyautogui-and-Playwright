@@ -1,440 +1,212 @@
 # ============================================================
 # DAILY REPORT BOT
 # ============================================================
+# Desktop automation with PyAutoGUI:
+#   1. Open Chrome on the CoinDesk Bitcoin page (Win+R)
+#   2. Select and copy the page text (Ctrl+A, Ctrl+C)
+#   3. Pull the live Bitcoin price out of the copied text
+#   4. Ctrl+F the price so it is highlighted, screenshot as proof
+#   5. Close Chrome (Alt+F4)
+#   6. Write the daily Excel report
+# ============================================================
 
 import os
-import time
 import re
+import time
 from datetime import datetime
 
 import pyautogui
 import pyperclip
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font, PatternFill
 
 
 # ============================================================
 # 1. SETTINGS
 # ============================================================
 
-pyautogui.FAILSAFE = True
+pyautogui.FAILSAFE = True      # move the mouse to a screen corner to stop
 pyautogui.PAUSE = 0.3
 
 URL = "https://www.coindesk.com/price/bitcoin/"
 
+# Chrome profile to open (skips the "Who's using Chrome?" picker).
+# See chrome://version -> "Profile Path" for the folder name, e.g. "Default" or "Profile 1".
+CHROME_PROFILE = "Profile 1"
+
+PAGE_LOAD_SECONDS = 10
+
 # Save reports next to this script (works on any PC)
 OUTPUT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-
 today = datetime.now()
-
 date_time = today.strftime("%Y-%m-%d %H:%M:%S")
 date_name = today.strftime("%Y-%m-%d")
 
-excel_filename = f"daily_report_{date_name}.xlsx"
-screenshot_filename = f"daily_report_{date_name}.png"
+excel_file = os.path.join(OUTPUT_FOLDER, f"daily_report_{date_name}.xlsx")
+screenshot_file = os.path.join(OUTPUT_FOLDER, f"daily_report_{date_name}.png")
 
-excel_file = os.path.join(
-    OUTPUT_FOLDER,
-    excel_filename
-)
-
-screenshot_file = os.path.join(
-    OUTPUT_FOLDER,
-    screenshot_filename
-)
-
-COMMENT = "Market information captured successfully"
+SOURCE = "CoinDesk"
 
 
 # ============================================================
-# 2. OPEN CHROME
-# ============================================================
-
-def open_chrome():
-
-    print("STEP 1: Opening Chrome...")
-
-    pyautogui.hotkey("win", "r")
-    time.sleep(0.6)
-
-    pyautogui.write(
-        "chrome",
-        interval=0.03
-    )
-
-    pyautogui.press("enter")
-
-    time.sleep(4)
-
-
-# ============================================================
-# 3. OPEN WEBSITE
+# 2. OPEN CHROME ON THE WEBSITE
 # ============================================================
 
 def open_website():
 
-    print("STEP 2: Opening website...")
+    print("STEP 1: Opening Chrome on CoinDesk...")
 
-    pyautogui.hotkey("ctrl", "t")
-    time.sleep(0.5)
+    # Win+R opens the Run box; launching Chrome with a profile and the URL
+    # avoids the profile picker and the address-bar typing.
+    pyautogui.hotkey("win", "r")
+    time.sleep(1)
 
-    pyautogui.hotkey(
-        "ctrl",
-        "l"
+    command = (
+        f'chrome --profile-directory="{CHROME_PROFILE}" '
+        f'--new-window --start-maximized {URL}'
     )
-    time.sleep(0.3)
-
-    pyperclip.copy(URL)
-    pyautogui.hotkey("ctrl", "v")
-    time.sleep(0.3)
-
+    pyautogui.write(command, interval=0.02)
     pyautogui.press("enter")
 
-    time.sleep(4)
-
-    pyautogui.press("f5")
-
-    # Wait for the page to finish loading before searching it
-    # (searching too early finds nothing -> "PRICE NOT FOUND")
-    time.sleep(8)
+    print(f"Waiting {PAGE_LOAD_SECONDS} seconds for the page to load...")
+    time.sleep(PAGE_LOAD_SECONDS)
 
 
 # ============================================================
-# 4. FIND BITCOIN, SELECT PRICE AND COPY
+# 3. COPY THE PAGE AND FIND THE PRICE
 # ============================================================
+
+def find_price(text):
+    """Return the Bitcoin price from the copied page text."""
+
+    # On the page the price follows the ticker: "BTC  #1  $77,383.11"
+    match = re.search(r"BTC\s*(?:#\d+\s*)?(\$[\d,]+\.\d{2})", text)
+
+    if match:
+        return match.group(1)
+
+    # Fallback: first dollar amount with cents
+    match = re.search(r"\$[\d,]+\.\d{2}", text)
+
+    return match.group(0) if match else None
+
 
 def get_web_data():
 
-    print("STEP 3: Finding Bitcoin price...")
+    print("STEP 2: Copying the page and finding the Bitcoin price...")
 
-    # --------------------------------------------------------
-    # Find Bitcoin
-    # --------------------------------------------------------
+    price = None
 
-    pyautogui.hotkey("ctrl", "f")
-    time.sleep(1)
+    for attempt in range(1, 4):
 
-    pyautogui.write(
-        "Bitcoin",
-        interval=0.05
-    )
+        pyperclip.copy("")
 
-    # Go to the required Bitcoin occurrence
-    pyautogui.press("enter")
-    time.sleep(1)
+        # Select all text on the page and copy it
+        pyautogui.hotkey("ctrl", "a")
+        time.sleep(0.5)
+        pyautogui.hotkey("ctrl", "c")
+        time.sleep(1.5)
 
-    # Close Find bar
-    pyautogui.press("esc")
-    time.sleep(1)
+        # Clear the selection highlight
+        pyautogui.press("esc")
+        pyautogui.hotkey("ctrl", "home")
 
-    # --------------------------------------------------------
-    # SELECT BITCOIN INFORMATION UP TO PRICE
-    # --------------------------------------------------------
+        price = find_price(pyperclip.paste())
 
-    pyautogui.keyDown("shift")
+        if price:
+            break
 
-    pyautogui.press(
-        "down",
-        presses=3,
-        interval=0.2
-    )
+        print(f"  Price not on the page yet (attempt {attempt}), waiting...")
+        time.sleep(4)
 
-    pyautogui.press("end")
-
-    pyautogui.keyUp("shift")
-
-    time.sleep(1)
-
-    # --------------------------------------------------------
-    # COPY CURRENT SELECTION
-    # --------------------------------------------------------
-
-    pyautogui.hotkey(
-        "ctrl",
-        "c"
-    )
-
-    time.sleep(3)
-
-    # Read clipboard
-    raw_data = pyperclip.paste().strip()
+    data = price or "PRICE NOT FOUND"
 
     print()
-    print("COPIED DATA:")
-    print(repr(raw_data))
+    print("BITCOIN PRICE:", data)
     print()
-
-    # --------------------------------------------------------
-    # GET ONLY THE PRICE
-    # --------------------------------------------------------
-
-    price_match = re.search(
-        r"\$[\d,]+(?:\.\d+)?",
-        raw_data
-    )
-
-    if price_match:
-
-        data = price_match.group(0)
-
-    else:
-
-        data = "PRICE NOT FOUND"
-
-    print()
-    print("PRICE TO EXCEL:")
-    print(data)
-    print()
-
-    # --------------------------------------------------------
-    # CLOSE CHROME
-    # --------------------------------------------------------
-
-    print("Closing Chrome...")
-
-    pyautogui.hotkey(
-        "alt",
-        "f4"
-    )
-
-    time.sleep(2)
 
     return data
-	
-# ============================================================
-# 5. OPEN EXCEL
-# ============================================================
-
-def open_excel():
-
-    print("STEP 4: Opening Excel...")
-
-    pyautogui.hotkey(
-        "win",
-        "r"
-    )
-
-    time.sleep(0.6)
-
-    pyautogui.write(
-        "excel",
-        interval=0.03
-    )
-
-    pyautogui.press("enter")
-
-    time.sleep(4)
 
 
 # ============================================================
-# 6. ENTER DATA INTO EXCEL
+# 4. SCREENSHOT OF THE PAGE
 # ============================================================
 
-def enter_excel_data(data):
+def take_screenshot(data):
 
-    print("STEP 5: Entering data into Excel...")
+    print("STEP 3: Highlighting the price and taking a screenshot...")
 
-    pyautogui.hotkey(
-        "ctrl",
-        "n"
-    )
+    # Ctrl+F the captured price: Chrome scrolls to it and highlights it,
+    # so the screenshot shows exactly the value that was read.
+    if data != "PRICE NOT FOUND":
+        pyautogui.hotkey("ctrl", "f")
+        time.sleep(0.8)
+        pyautogui.write(data.lstrip("$"), interval=0.05)
+        time.sleep(1.5)
 
+    pyautogui.screenshot().save(screenshot_file)
+
+    # Close the find bar
+    pyautogui.press("esc")
+
+    print("Screenshot saved:", screenshot_file)
+
+
+# ============================================================
+# 5. CLOSE CHROME
+# ============================================================
+
+def close_chrome():
+
+    print("STEP 4: Closing Chrome...")
+
+    pyautogui.hotkey("alt", "f4")
     time.sleep(1.5)
 
-    pyautogui.hotkey(
-        "ctrl",
-        "home"
-    )
-
-    # Headers
-
-    pyautogui.write(
-        "Date & Time",
-        interval=0.02
-    )
-
-    pyautogui.press("tab")
-
-    pyautogui.write(
-        "Fetched Data",
-        interval=0.02
-    )
-
-    pyautogui.press("tab")
-
-    pyautogui.write(
-        "Comment",
-        interval=0.02
-    )
-
-    pyautogui.press("enter")
-
-    # Timestamp
-
-    pyautogui.write(
-        date_time,
-        interval=0.02
-    )
-
-    pyautogui.press("tab")
-
-    # Website data
-
-    pyperclip.copy(data)
-
-    pyautogui.hotkey(
-        "ctrl",
-        "v"
-    )
-
-    pyautogui.press("tab")
-
-    # Comment
-
-    pyautogui.write(
-        COMMENT,
-        interval=0.02
-    )
-
-    pyautogui.press("enter")
-
-    time.sleep(1)
-
-    print("Data entered successfully.")
-
 
 # ============================================================
-# 7. SAVE EXCEL - EXACT LOCATION
+# 6. WRITE THE EXCEL REPORT
 # ============================================================
 
-def save_excel():
+def save_excel(data):
 
-    print("STEP 7: Saving Excel...")
+    print("STEP 5: Writing the Excel report...")
 
-    pyautogui.press("f12")
+    headers = ["Date & Time", "Bitcoin Price (USD)", "Source", "Comment"]
 
-    time.sleep(2)
-
-    pyautogui.hotkey(
-        "ctrl",
-        "a"
+    comment = (
+        "Market information captured successfully"
+        if data != "PRICE NOT FOUND"
+        else "Price could not be read from the page"
     )
 
-    time.sleep(0.5)
-
-    pyperclip.copy(excel_file)
-
-    pyautogui.hotkey(
-        "ctrl",
-        "v"
-    )
-
-    time.sleep(0.5)
-
-    pyautogui.press("enter")
-
-    time.sleep(2)
-
-
-    # ========================================================
-    # REPLACE EXISTING FILE -> YES
-    # ========================================================
-
-    print("Checking for Replace confirmation...")
-
-    # Excel's Replace dialog supports Alt+Y for Yes.
-    pyautogui.hotkey(
-        "alt",
-        "y"
-    )
-
-    time.sleep(2)
-
-
-    # ========================================================
-    # KEEP CURRENT FORMAT
-    # ========================================================
-
-    pyautogui.hotkey(
-        "alt",
-        "y"
-    )
-
-    time.sleep(2)
-
-
-    # ========================================================
-    # FINAL SAVE
-    # ========================================================
-
-    pyautogui.hotkey(
-        "ctrl",
-        "s"
-    )
-
-    time.sleep(2)
-
-
-    # ========================================================
-    # VERIFY FILE
-    # ========================================================
-
+    # Add a row to today's report (several runs a day -> several rows)
     if os.path.exists(excel_file):
-
-        print()
-        print("EXCEL SAVED SUCCESSFULLY")
-        print(excel_file)
-        print()
-
+        workbook = load_workbook(excel_file)
+        sheet = workbook.active
     else:
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Daily Report"
+        sheet.append(headers)
 
-        print()
-        print("ERROR: Excel file was NOT found.")
-        print("Expected location:")
-        print(excel_file)
-        print()
+        for cell in sheet[1]:
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill("solid", fgColor="1F4E78")
 
+    sheet.append([date_time, data, SOURCE, comment])
 
-# ============================================================
-# 8. TAKE SCREENSHOT OF EXCEL
-# ============================================================
+    for column, width in zip("ABCD", [22, 22, 14, 44]):
+        sheet.column_dimensions[column].width = width
 
-def take_screenshot():
+    workbook.save(excel_file)
 
-    print("STEP 6: Taking screenshot of Excel...")
-
-    time.sleep(1)
-
-    screenshot = pyautogui.screenshot()
-
-    screenshot.save(
-        screenshot_file
-    )
-
-    print()
-    print("SCREENSHOT SAVED")
-    print(screenshot_file)
-    print()
+    print("Excel saved:", excel_file)
 
 
 # ============================================================
-# 9. CLOSE EXCEL
-# ============================================================
-
-def close_excel():
-
-    print("STEP 8: Closing Excel...")
-
-    pyautogui.hotkey(
-        "alt",
-        "f4"
-    )
-
-    time.sleep(1.5)
-
-
-# ============================================================
-# 10. MAIN
+# 7. MAIN
 # ============================================================
 
 def main():
@@ -445,36 +217,20 @@ def main():
     print("==============================================")
     print()
 
-    open_chrome()
-
     open_website()
-
     data = get_web_data()
-
-    open_excel()
-
-    enter_excel_data(data)
-
-    take_screenshot()
-
-    save_excel()
-
-    close_excel()
+    take_screenshot(data)
+    close_chrome()
+    save_excel(data)
 
     print()
     print("==============================================")
     print("             REPORT COMPLETED")
     print("==============================================")
     print()
-
-    print("Excel:")
-    print(excel_file)
-
-    print()
-
-    print("Screenshot:")
-    print(screenshot_file)
-
+    print("Bitcoin price:", data)
+    print("Excel        :", excel_file)
+    print("Screenshot   :", screenshot_file)
     print()
 
 

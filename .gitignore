@@ -17,5 +17,5 @@ Play_wright_bot/whatsapp_report_*
 daily_report_bot/daily_report_*.xlsx
 daily_report_bot/daily_report_*.png
 
-# Demo recording of an early run (not published)
-daily_report_bot/demo/
+# Old demo recording of a failed early run (not published)
+daily_report_bot/demo/pyautogui_project_demo.mp4

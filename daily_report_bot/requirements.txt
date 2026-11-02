@@ -1,5 +1,6 @@
 pyautogui
 pyperclip
 pillow
+openpyxl
 opencv-python
 numpy

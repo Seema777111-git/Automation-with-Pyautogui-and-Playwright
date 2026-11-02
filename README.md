@@ -5,8 +5,10 @@ browser** (page elements).
 
 | # | Project | Tool | What it automates |
 |---|---|---|---|
-| 1 | [**Daily Report Bot**](daily_report_bot) | PyAutoGUI | Opens Chrome, copies the live Bitcoin price from CoinDesk, writes it into Excel, saves the report and a screenshot |
+| 1 | [**Daily Report Bot**](daily_report_bot) | PyAutoGUI | Opens Chrome on CoinDesk, copies the live Bitcoin price, highlights it as proof, saves a screenshot and a daily Excel report |
 | 2 | [**WhatsApp Message Bot**](Play_wright_bot) | Playwright | Reads contacts from Excel, sends each a personalised WhatsApp Web message, screenshots it, reads their last 3 replies and saves a report |
+
+🎬 **Demo:** [Daily Report Bot, real run (27 s)](daily_report_bot/demo/daily_report_bot_demo.mp4)
 
 ```text
 Automation-with-Pyautogui-and-Playwright/
@@ -14,6 +16,7 @@ Automation-with-Pyautogui-and-Playwright/
 │   ├── daily_report_bot.py
 │   ├── find_coordinates.py
 │   ├── screen_record.py
+│   ├── demo/daily_report_bot_demo.mp4
 │   ├── requirements.txt
 │   └── README.md
 │
