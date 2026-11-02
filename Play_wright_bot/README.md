@@ -3,6 +3,11 @@
 A **browser automation** bot. It reads a contact list from Excel, opens WhatsApp Web with Playwright, sends each
 person a personalised message, takes a screenshot as proof, reads their last 3 replies, and saves a report.
 
+## 🎬 Demo
+
+[▶ Watch the demo (29 s)](demo/whatsapp_bot_demo.mp4): a real run recorded by Playwright, sending one test
+message. Waiting time is sped up and private chats are blurred.
+
 ## How it works
 
 ```text
@@ -34,6 +39,7 @@ doesn't match, the contact is reported as **not found** and nothing is sent.
 | File | Purpose |
 |---|---|
 | `playwright_assign.py` | The bot |
+| `demo/whatsapp_bot_demo.mp4` | Demo video |
 | `Contact.sample.xlsx` | Example contact list (fake numbers). Copy it to `Contact.xlsx` and add your contacts |
 | `requirements.txt` | playwright, pandas, openpyxl |
 
